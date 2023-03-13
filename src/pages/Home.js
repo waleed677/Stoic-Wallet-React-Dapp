@@ -66,6 +66,7 @@ function Home() {
         StoicIdentity.disconnect();
         setConnected(false);
         setAddress("");
+        setHoldNFT(-1);
     }
 
     useEffect(() => {
