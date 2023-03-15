@@ -9,28 +9,51 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory } from './did.js';
 import Alert from 'react-bootstrap/Alert';
 import axios from 'axios';
+import Modal from 'react-bootstrap/Modal';
+
 
 function Home() {
 
-
-    const adminApiKey= process.env.REACT_APP_ADMIN_TOKEN_KEY;
-    const apiKey = process.env.REACT_APP_API_KEY;
-    const secretKey = process.env.REACT_APP_SECRET_KEY;
-    const shopName  = process.env.REACT_APP_SHOP_NAME;
-    const canisterId = process.env.REACT_APP_CANISTER_ID; 
+    const adminApiKey = process.env.REACT_APP_ADMIN_TOKEN_KEY;
+    const canisterId = process.env.REACT_APP_CANISTER_ID;
     const host = 'https://ic0.app';
 
 
-    const [loader, setLoader] = useState(true);
+    const [loader, setLoader] = useState(-1);
     const [connected, setConnected] = useState(false);
     const [address, setAddress] = useState("");
-    const [holdNFT, setHoldNFT] = useState(-1);
+    const [holdNFT, setHoldNFT] = useState(null);
+    const [discountCode, setDiscountCode] = useState("");
+    const [show, setShow] = useState(false);
 
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+
+    const getNftsFromCollecton = async (actor) => {
+        
+        const nfts = await actor.listings();
+
+        // loop through all nfts and get each nft principle
+        nfts.forEach((nft) => {
+            const sellerBytes = nft[1].seller;
+            let seller = sellerBytes.toString();
+
+            if (seller !== address) {
+                setHoldNFT(false);
+                setLoader(false);
+            } else {
+                setHoldNFT(true);
+                setLoader(false);
+                getDiscountCode();
+            }
+        });
+    }
 
     // Connect Wallet with StoicWallet
-    async function connectWallet() {
-
+    const connectStoicWallet = async () => {
         try {
+            handleClose();
             const identity = await StoicIdentity.load();
             if (identity !== false) {
                 setAddress(identity.getPrincipal().toText());
@@ -46,24 +69,8 @@ function Home() {
                 agent: new HttpAgent({ identity, host: host }),
                 canisterId,
             });
-
-            const nfts = await actor.listings();
-
-
-            // loop through all nfts and get each nft principle
-
-            nfts.forEach((nft) => {
-                const sellerBytes = nft[1].seller;
-                let seller = sellerBytes.toString();
-
-                if (seller != address) {
-                    setHoldNFT(false);
-                    setLoader(false);
-                } else {
-                    setHoldNFT(true);
-                    setLoader(false);
-                }
-            });
+            
+            getNftsFromCollecton(actor);
 
 
         } catch (error) {
@@ -73,30 +80,68 @@ function Home() {
         }
     }
 
+    const connectPlugWallet = async () => {
+        handleClose();
+        try {
+            const whitelist = [canisterId];
+            const identity = await window.ic.plug.requestConnect({
+                whitelist,
+                host,
+            });
+            if (identity !== false) {
+                setAddress(window.ic.plug.principalId);
+                setConnected(true);
+            } 
+
+            setLoader(true);
+            const actor = await window.ic.plug.createActor({
+                canisterId: canisterId,
+                interfaceFactory: idlFactory,
+            });
+
+
+            getNftsFromCollecton(actor);
+
+        } catch (error) {
+            console.log(`Error connecting to wallet: ${error.message}`);
+        }
+    }
+
+    // Callback to print sessionData
+    const onConnectionUpdate = () => {
+        console.log("Here",window.ic.plug.sessionManager.sessionData)
+    }
+
     // Disconnect Wallet
     const disconnectWallet = () => {
         StoicIdentity.disconnect();
         setConnected(false);
         setAddress("");
-        setHoldNFT(-1);
+        setHoldNFT(null);
+        setDiscountCode("");
     }
 
     // Get Discount Shopify Admin API's
-    const geTDiscountCode = async () => {
-        axios.get(`https://${shopName}.myshopify.com/admin/api/2022-01/price_rules.json`, {
+    const getDiscountCode = async () => {
+        axios.get('/price_rules.json', {
             headers: {
-              'X-Shopify-Access-Token': adminApiKey,
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
+                'X-Shopify-Access-Token': adminApiKey,
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
             },
-          })
+        })
             .then((response) => {
-              console.log(response);
+                let res = response.data.price_rules;
+                res.forEach((code) => {
+                    if (code.title.startsWith("NFT")) {
+                        setDiscountCode(code.title);
+                    }
+                });
             })
             .catch((error) => {
-              console.log(error);
+                console.log(error);
             });
-      }
+    }
 
 
     useEffect(() => {
@@ -104,7 +149,7 @@ function Home() {
         setTimeout(() => {
             setLoader(false);
         }, 1000)
-        geTDiscountCode();
+
     }, [])
 
     return (
@@ -122,15 +167,38 @@ function Home() {
                 </div>
 
                 <div className="text-center mt-5">
-                    {!holdNFT && <Alert className='font-italic' variant={"danger"}>You don't hold any NFT from our Collection</Alert>}
+                    {!holdNFT && holdNFT !== null && <Alert className='font-italic' variant={"danger"}>You don't hold any NFT from our Collection </Alert>}
+                </div>
+                <div className="text-center mt-5">
+                    {holdNFT && <Alert className='font-italic' variant={"success"}>Your Discounted Code is : {discountCode}</Alert>}
                 </div>
                 <div className='mx-auto text-center mt-5'>
-                    {!connected && <Button onClick={connectWallet}>Connect Stoic Wallet</Button>}
+                    {!connected && <Button onClick={handleShow}>Connect Wallet</Button>}
                     {connected && <Button onClick={disconnectWallet} variant="danger">Disconnect Wallet</Button>}
                 </div>
 
             </Container>
             <Footer />
+
+
+            <Modal show={show} onHide={handleClose} style={{ marginTop: "30vh" }}>
+                <Modal.Header closeButton>
+                    <Modal.Title >Choose Wallet</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className='d-flex flex-column align-items-center'>
+                        <Button size="lg" onClick={connectStoicWallet}>
+                            <img src={"assets/stoic.png"} className="img-fluid mr-2" style={{ width: "10%" }} />
+                            <span>Stoic Wallet</span>
+                        </Button>
+                        <Button size="lg" onClick={connectPlugWallet} className="mt-2">
+                            <img src={"assets/plug.png"} className="img-fluid mr-2" style={{ width: "10%" }} />
+                            <span>Plug Wallet</span>
+                        </Button>
+                    </div>
+                </Modal.Body>
+
+            </Modal>
         </>
 
 
