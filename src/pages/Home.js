@@ -8,15 +8,26 @@ import Loader from '../component/Loader';
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory } from './did.js';
 import Alert from 'react-bootstrap/Alert';
+import axios from 'axios';
+
 function Home() {
+
+
+    const adminApiKey= process.env.REACT_APP_ADMIN_TOKEN_KEY;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const secretKey = process.env.REACT_APP_SECRET_KEY;
+    const shopName  = process.env.REACT_APP_SHOP_NAME;
+    const canisterId = process.env.REACT_APP_CANISTER_ID; 
+    const host = 'https://ic0.app';
+
 
     const [loader, setLoader] = useState(true);
     const [connected, setConnected] = useState(false);
     const [address, setAddress] = useState("");
     const [holdNFT, setHoldNFT] = useState(-1);
 
-    const canisterId = 'x7z74-uiaaa-aaaag-qbsnq-cai'; // the ID of your canister
-    const host = 'https://ic0.app';
+
+    // Connect Wallet with StoicWallet
     async function connectWallet() {
 
         try {
@@ -62,6 +73,7 @@ function Home() {
         }
     }
 
+    // Disconnect Wallet
     const disconnectWallet = () => {
         StoicIdentity.disconnect();
         setConnected(false);
@@ -69,12 +81,30 @@ function Home() {
         setHoldNFT(-1);
     }
 
+    // Get Discount Shopify Admin API's
+    const geTDiscountCode = async () => {
+        axios.get(`https://${shopName}.myshopify.com/admin/api/2022-01/price_rules.json`, {
+            headers: {
+              'X-Shopify-Access-Token': adminApiKey,
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin' : '*'
+            },
+          })
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+      }
+
+
     useEffect(() => {
 
         setTimeout(() => {
             setLoader(false);
         }, 1000)
-
+        geTDiscountCode();
     }, [])
 
     return (
