@@ -30,31 +30,7 @@ function Home() {
     const handleShow = () => setShow(true);
 
 
-    const getNftsFromCollecton = async (actor) => {
-        
-        const nfts = await actor.listings();
-        const add = "lmpfg-27vgd-wjh2r-6ii7i-serdg-bicui-6efhb-6fv6y-gf7us-znhdc-gae";
-        // loop through all nfts and get each nft principle
-
-        let nftHold = false;
-        nfts.forEach((nft) => {
-            const sellerBytes = nft[1].seller;
-            let seller = sellerBytes.toString();
-            if (seller === address) {
-                nftHold = true;
-                // Break out of the loop since we found a match
-                return false;
-            } 
-        });
-
-        if(nftHold) {
-            setHoldNFT(true);
-            getDiscountCode();
-        } else {
-            setHoldNFT(false)
-        }
-        setLoader(false);
-    }
+ 
 
     // Connect Wallet with StoicWallet
     const connectStoicWallet = async () => {
@@ -98,7 +74,7 @@ function Home() {
                 setAddress(window.ic.plug.principalId);
                 setConnected(true);
             } 
-
+           
             setLoader(true);
             const actor = await window.ic.plug.createActor({
                 canisterId: canisterId,
@@ -106,16 +82,38 @@ function Home() {
             });
 
 
-            getNftsFromCollecton(actor);
+            getNftsFromCollecton(actor, window.ic.plug.principalId);
 
         } catch (error) {
             console.log(`Error connecting to wallet: ${error.message}`);
         }
     }
 
-    // Callback to print sessionData
-    const onConnectionUpdate = () => {
-        console.log("Here",window.ic.plug.sessionManager.sessionData)
+    const getNftsFromCollecton = async (actor, address) => {
+        
+        const nfts = await actor.listings();
+        const add = "lmpfg-27vgd-wjh2r-6ii7i-serdg-bicui-6efhb-6fv6y-gf7us-znhdc-gae";
+        // loop through all nfts and get each nft principle
+        let nftHold = false;
+        console.log({address});
+        nfts.forEach((nft) => {
+            const sellerBytes = nft[1].seller;
+            let seller = sellerBytes.toString();
+            if (seller === address) {
+                nftHold = true;
+                console.warn("inner if");
+                // Break out of the loop since we found a match
+                return false;
+            } 
+        });
+
+        if(nftHold) {
+            setHoldNFT(true);
+            getDiscountCode();
+        } else {
+            setHoldNFT(false)
+        }
+        setLoader(false);
     }
 
     // Disconnect Wallet
@@ -148,7 +146,6 @@ function Home() {
                 console.log(error);
             });
     }
-
 
     useEffect(() => {
 
