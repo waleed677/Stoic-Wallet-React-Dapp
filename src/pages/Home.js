@@ -33,21 +33,23 @@ function Home() {
     const getNftsFromCollecton = async (actor) => {
         
         const nfts = await actor.listings();
-
+        const add = "lmpfg-27vgd-wjh2r-6ii7i-serdg-bicui-6efhb-6fv6y-gf7us-znhdc-gae";
         // loop through all nfts and get each nft principle
+
+        let nftHold = false;
         nfts.forEach((nft) => {
             const sellerBytes = nft[1].seller;
             let seller = sellerBytes.toString();
-
-            if (seller !== address) {
-                setHoldNFT(false);
-                setLoader(false);
-            } else {
-                setHoldNFT(true);
-                setLoader(false);
+            if (seller === address) {
                 getDiscountCode();
-            }
+                nftHold = true;
+                // Break out of the loop since we found a match
+                return false;
+            } 
         });
+
+        nftHold == true ? setHoldNFT(true): setHoldNFT(false);
+        setLoader(false);
     }
 
     // Connect Wallet with StoicWallet
