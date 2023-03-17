@@ -41,14 +41,18 @@ function Home() {
             const sellerBytes = nft[1].seller;
             let seller = sellerBytes.toString();
             if (seller === address) {
-                getDiscountCode();
                 nftHold = true;
                 // Break out of the loop since we found a match
                 return false;
             } 
         });
 
-        nftHold == true ? setHoldNFT(true): setHoldNFT(false);
+        if(nftHold) {
+            setHoldNFT(true);
+            getDiscountCode();
+        } else {
+            setHoldNFT(false)
+        }
         setLoader(false);
     }
 
