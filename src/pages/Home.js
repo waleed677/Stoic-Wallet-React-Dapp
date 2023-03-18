@@ -5,12 +5,11 @@ import Footer from '../component/Footer';
 import Header from '../component/Header';
 import { StoicIdentity } from "ic-stoic-identity";
 import Loader from '../component/Loader';
-import { Actor, HttpAgent } from '@dfinity/agent';
+import { Actor, HttpAgent, Agent } from '@dfinity/agent';
 import { idlFactory } from './did.js';
 import Alert from 'react-bootstrap/Alert';
 import axios from 'axios';
 import Modal from 'react-bootstrap/Modal';
-
 
 function Home() {
 
@@ -30,29 +29,29 @@ function Home() {
     const handleShow = () => setShow(true);
 
 
- 
-
     // Connect Wallet with StoicWallet
     const connectStoicWallet = async () => {
         try {
             handleClose();
-            const identity = await StoicIdentity.load();
-            if (identity !== false) {
-                setAddress(identity.getPrincipal().toText());
-                setConnected(true);
-            } else {
-                const newIdentity = await StoicIdentity.connect();
-                setAddress(newIdentity.getPrincipal().toText());
-                setConnected(true);
-            }
-
+            let mainAddress = "";
+            const identity = await StoicIdentity.connect();
             setLoader(true);
+            if (identity) {
+                // setAddress(identity.getPrincipal().toText());
+                mainAddress = await identity.accounts();
+                mainAddress = JSON.parse(mainAddress);
+                mainAddress = mainAddress[0].address;
+                setAddress(mainAddress);
+                setConnected(true);
+            } 
+
+            
             const actor = Actor.createActor(idlFactory, {
                 agent: new HttpAgent({ identity, host: host }),
                 canisterId,
             });
             
-            getNftsFromCollecton(actor);
+            getNftsFromCollecton(actor,mainAddress);
 
 
         } catch (error) {
@@ -71,7 +70,7 @@ function Home() {
                 host,
             });
             if (identity !== false) {
-                setAddress(window.ic.plug.principalId);
+                setAddress(window.ic.plug.accountId);
                 setConnected(true);
             } 
            
@@ -82,7 +81,7 @@ function Home() {
             });
 
 
-            getNftsFromCollecton(actor, window.ic.plug.principalId);
+            getNftsFromCollecton(actor, window.ic.plug.accountId);
 
         } catch (error) {
             console.log(`Error connecting to wallet: ${error.message}`);
@@ -90,14 +89,14 @@ function Home() {
     }
 
     const getNftsFromCollecton = async (actor, address) => {
-        
-        const nfts = await actor.listings();
-        const add = "lmpfg-27vgd-wjh2r-6ii7i-serdg-bicui-6efhb-6fv6y-gf7us-znhdc-gae";
+        console.log({address});
+        const nfts = await actor.getRegistry();
+
+        // console.warn({nfts});
         // loop through all nfts and get each nft principle
         let nftHold = false;
-        console.log({address});
         nfts.forEach((nft) => {
-            const sellerBytes = nft[1].seller;
+            const sellerBytes = nft[1];
             let seller = sellerBytes.toString();
             if (seller === address) {
                 nftHold = true;
@@ -166,7 +165,7 @@ function Home() {
                 </div>
 
                 <div className="text-center mt-5">
-                    {connected && <h5 className='font-italic'>Your Principle ID is : {address}</h5>}
+                    {connected && <h5 className='font-italic'>Your Account ID is : {address}</h5>}
                 </div>
 
                 <div className="text-center mt-5">
