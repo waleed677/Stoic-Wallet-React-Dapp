@@ -44,8 +44,6 @@ function Home() {
                 setAddress(mainAddress);
                 setConnected(true);
             } 
-
-            
             const actor = Actor.createActor(idlFactory, {
                 agent: new HttpAgent({ identity, host: host }),
                 canisterId,
@@ -134,6 +132,7 @@ function Home() {
             },
         })
             .then((response) => {
+                console.log({response});
                 let res = response.data.price_rules;
                 res.forEach((code) => {
                     if (code.title.startsWith("NFT")) {
@@ -142,7 +141,7 @@ function Home() {
                 });
             })
             .catch((error) => {
-                console.log(error);
+                console.log("Error is:",error);
             });
     }
 
