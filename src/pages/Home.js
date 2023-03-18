@@ -43,13 +43,13 @@ function Home() {
                 mainAddress = mainAddress[0].address;
                 setAddress(mainAddress);
                 setConnected(true);
-            } 
+            }
             const actor = Actor.createActor(idlFactory, {
                 agent: new HttpAgent({ identity, host: host }),
                 canisterId,
             });
-            
-            getNftsFromCollecton(actor,mainAddress);
+
+            getNftsFromCollecton(actor, mainAddress);
 
 
         } catch (error) {
@@ -70,8 +70,8 @@ function Home() {
             if (identity !== false) {
                 setAddress(window.ic.plug.accountId);
                 setConnected(true);
-            } 
-           
+            }
+
             setLoader(true);
             const actor = await window.ic.plug.createActor({
                 canisterId: canisterId,
@@ -87,7 +87,7 @@ function Home() {
     }
 
     const getNftsFromCollecton = async (actor, address) => {
-        console.log({address});
+        console.log({ address });
         const nfts = await actor.getRegistry();
 
         // loop through all nfts and get each nft principle
@@ -100,10 +100,10 @@ function Home() {
                 console.warn("inner if");
                 // Break out of the loop since we found a match
                 return false;
-            } 
+            }
         });
 
-        if(nftHold) {
+        if (nftHold) {
             setHoldNFT(true);
             getDiscountCode();
         } else {
@@ -127,18 +127,20 @@ function Home() {
             headers: {
                 'X-Shopify-Access-Token': adminApiKey,
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
             },
         }).then((response) => {
-                console.log({response});
-                let res = response.data.price_rules;
-                res.forEach((code) => {
-                    if (code.title.startsWith("NFT")) {
-                        setDiscountCode(code.title);
-                    }
-                });
-            })
+            console.log({ response });
+            let res = response.data.price_rules;
+            res.forEach((code) => {
+                if (code.title.startsWith("NFT")) {
+                    setDiscountCode(code.title);
+                }
+            });
+        })
             .catch((error) => {
-                console.log("Error is:",error);
+                console.log("Error is:", error);
             });
     }
 
@@ -162,14 +164,14 @@ function Home() {
     //         console.log("Error is:", error);
     //       });
     //   }
-      
+
     useEffect(() => {
 
 
         setTimeout(() => {
             setLoader(false);
         }, 1000)
-getDiscountCode();
+        getDiscountCode();
     }, [])
 
     return (
