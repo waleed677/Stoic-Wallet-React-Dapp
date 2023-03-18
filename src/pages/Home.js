@@ -165,10 +165,11 @@ function Home() {
       
     useEffect(() => {
 
+
         setTimeout(() => {
             setLoader(false);
         }, 1000)
-
+getDiscountCode();
     }, [])
 
     return (
