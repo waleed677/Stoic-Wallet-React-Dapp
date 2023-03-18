@@ -90,7 +90,6 @@ function Home() {
         console.log({address});
         const nfts = await actor.getRegistry();
 
-        // console.warn({nfts});
         // loop through all nfts and get each nft principle
         let nftHold = false;
         nfts.forEach((nft) => {
@@ -128,7 +127,6 @@ function Home() {
             headers: {
                 'X-Shopify-Access-Token': adminApiKey,
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
             },
         })
             .then((response) => {
