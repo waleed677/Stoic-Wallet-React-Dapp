@@ -123,7 +123,7 @@ function Home() {
 
     // Get Discount Shopify Admin API's
     const getDiscountCode = async () => {
-        axios.get('/price_rules.json', {
+        axios.get('https://is-not-art.myshopify.com/admin/api/2023-01/price_rules.json', {
             headers: {
                 'X-Shopify-Access-Token': adminApiKey,
                 'Content-Type': 'application/json',
