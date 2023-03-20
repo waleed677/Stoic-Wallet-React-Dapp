@@ -123,7 +123,7 @@ function Home() {
 
     // Get Discount Shopify Admin API's
     const getDiscountCode = async () => {
-        axios.get('/get-discount-code.php').then((response) => {
+        axios.get('https://thesaudiworkers.com/api/get-discount-code.php').then((response) => {
             const data = response;
             console.log(data);
             let res = response.data.price_rules;
