@@ -2,6 +2,7 @@
   "name": "stoic-wallet-nfts",
   "version": "0.1.0",
   "private": true,
+  "proxy":"https://thesaudiworkers.com/api",
   "dependencies": {
     "@connect2ic/core": "^0.2.0-beta.5",
     "@connect2ic/react": "^0.2.0-beta.5",
