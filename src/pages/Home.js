@@ -123,10 +123,9 @@ function Home() {
 
     // Get Discount Shopify Admin API's
     const getDiscountCode = async () => {
-        axios.get('https://wispy-limit-6922.on.fleek.co/price-rules',).then((response) => {
-            const data = response;
-            console.log(data);
-            let res = response.data.price_rules;
+        axios.get('https://master--loquacious-crostata-7d79b9.netlify.app/.netlify/functions/api/price-rules',).then((response) => {
+            let res = response.data;
+            console.log({res});
             res.forEach((code) => {
                 if (code.title.startsWith("NFT")) {
                     setDiscountCode(code.title);
@@ -138,30 +137,12 @@ function Home() {
             });
     }
 
-    // const getDiscountCode = async () => {
-    //     fetch('https://thesaudiworkers.com/api/get-discount-code.php'   )
-    //       .then(response => response.json())
-    //       .then(data => {
-    //         console.log(data);
-    //         // const res = data.price_rules;
-    //         // res.forEach(code => {
-    //         //   if (code.title.startsWith("NFT")) {
-    //         //     setDiscountCode(code.title);
-    //         //   }
-    //         // });
-    //       })
-    //       .catch(error => {
-    //         console.log("Error is:", error);
-    //       });
-    //   }
-
     useEffect(() => {
 
 
         setTimeout(() => {
             setLoader(false);
         }, 1000)
-        getDiscountCode();
     }, [])
 
     return (
