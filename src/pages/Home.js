@@ -123,15 +123,9 @@ function Home() {
 
     // Get Discount Shopify Admin API's
     const getDiscountCode = async () => {
-        axios.get('https://is-not-art.myshopify.com/admin/api/2023-01/price_rules.json', {
-            headers: {
-                'X-Shopify-Access-Token': adminApiKey,
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
-            },
-        }).then((response) => {
-            console.log({ response });
+        axios.get('https://thesaudiworkers.com/api/get-discount-code.php').then((response) => {
+            const data = response;
+            console.log(data);
             let res = response.data.price_rules;
             res.forEach((code) => {
                 if (code.title.startsWith("NFT")) {
@@ -145,20 +139,16 @@ function Home() {
     }
 
     // const getDiscountCode = async () => {
-    //     fetch('https://is-not-art.myshopify.com/admin/api/2023-01/price_rules.json', {
-    //       headers: {
-    //         'X-Shopify-Access-Token': adminApiKey,
-    //         'Content-Type': 'application/json',
-    //       },
-    //     })
+    //     fetch('https://thesaudiworkers.com/api/get-discount-code.php')
     //       .then(response => response.json())
     //       .then(data => {
-    //         const res = data.price_rules;
-    //         res.forEach(code => {
-    //           if (code.title.startsWith("NFT")) {
-    //             setDiscountCode(code.title);
-    //           }
-    //         });
+    //         console.log(data);
+    //         // const res = data.price_rules;
+    //         // res.forEach(code => {
+    //         //   if (code.title.startsWith("NFT")) {
+    //         //     setDiscountCode(code.title);
+    //         //   }
+    //         // });
     //       })
     //       .catch(error => {
     //         console.log("Error is:", error);
