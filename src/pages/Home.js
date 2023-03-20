@@ -123,7 +123,7 @@ function Home() {
 
     // Get Discount Shopify Admin API's
     const getDiscountCode = async () => {
-        axios.get('http://localhost:4000/price-rules',).then((response) => {
+        axios.get('https://wispy-limit-6922.on.fleek.co/price-rules',).then((response) => {
             const data = response;
             console.log(data);
             let res = response.data.price_rules;
